@@ -1,1 +1,1 @@
-declare module "postcss/lib/stringifier";
+declare module 'postcss/lib/stringifier'

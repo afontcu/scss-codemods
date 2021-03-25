@@ -1,145 +1,145 @@
-import LazyResult from "postcss/lib/lazy-result";
-import { createProcessor } from "utils/postcss";
-import removeDashAmpersand from "./remove-dash-ampersand";
+import LazyResult from 'postcss/lib/lazy-result'
+import { createProcessor } from 'utils/postcss'
+import removeDashAmpersand from './remove-dash-ampersand'
 
 function testCommonBehavior(process: (css: string) => LazyResult) {
-  describe("unwind", () => {
-    it("should fold out dash ampersand rules", async () => {
+  describe.each([['-'], ['_']])('unwind', (prefix) => {
+    it('should fold out dash ampersand rules', async () => {
       expect(
         await process(`
-          .rule { 
-            &-part1 {}
+          .rule {
+            &${prefix}part1 {}
           }
         `)
       ).toMatchCSS(`
         .rule {}
-        .rule-part1 {}
-      `);
-    });
+        .rule${prefix}part1 {}
+      `)
+    })
 
-    it("should work with multiple child rules", async () => {
+    it('should work with multiple child rules', async () => {
       expect(
         await process(`
-          .rule { 
-            &-extension1 {} 
-            &-extension2 {}
+          .rule {
+            &${prefix}extension1 {}
+            &${prefix}extension2 {}
           }
         `)
       ).toMatchCSS(`
         .rule {}
-        .rule-extension1 {}
-        .rule-extension2 {}
-      `);
-    });
+        .rule${prefix}extension1 {}
+        .rule${prefix}extension2 {}
+      `)
+    })
 
     // Test insert after respects parent changes
 
-    it("should work with nested child rules", async () => {
+    it('should work with nested child rules', async () => {
       expect(
         await process(`
-          .rule { 
-            &-part1 { 
-              &-part2 {}
+          .rule {
+            &${prefix}part1 {
+              &${prefix}part2 {}
             }
           }
         `)
       ).toMatchCSS(`
         .rule {}
-        .rule-part1 {}
-        .rule-part1-part2 {}
-      `);
-    });
+        .rule${prefix}part1 {}
+        .rule${prefix}part1${prefix}part2 {}
+      `)
+    })
 
-    it("should maintain expanded order", async () => {
+    it('should maintain expanded order', async () => {
       expect(
         await process(`
           .rule1 {
-            &-part1 {}
+            &${prefix}part1 {}
           }
-    
+
           .rule2 {
-            &-part2 {}
+            &${prefix}part2 {}
           }
         `)
       ).toMatchCSS(`
         .rule1 {}
-        .rule1-part1 {}
+        .rule1${prefix}part1 {}
 
         .rule2 {}
 
-        .rule2-part2 {}
-      `);
-    });
+        .rule2${prefix}part2 {}
+      `)
+    })
 
-    it("should skip rules with only some &- selectors", async () => {
+    it(`should skip rules with only some &${prefix} selectors`, async () => {
       expect(
         await process(`
-          .rule { 
-            &-part1,
-            .something-else {} 
+          .rule {
+            &${prefix}part1,
+            .something-else {}
           }
         `)
       ).toMatchCSS(`
         .rule {
-          &-part1,
+          &${prefix}part1,
           .something-else {}
         }
-      `);
-    });
+      `)
+    })
 
-    it("should work with multiple parent selectors", async () => {
+    it('should work with multiple parent selectors', async () => {
       expect(
         await process(`
           .rule1,
-          .rule2 { 
-            &-part1 {}
+          .rule2 {
+            &${prefix}part1 {}
           }
         `)
       ).toMatchCSS(`
         .rule1,
         .rule2 {}
-        .rule1-part1,
-        .rule2-part1 {}
-      `);
-    });
+        .rule1${prefix}part1,
+        .rule2${prefix}part1 {}
+      `)
+    })
 
-    it("should fully transform rules with multiple &- selectors", async () => {
+    it(`should fully transform rules with multiple &${prefix} selectors`, async () => {
       expect(
         await process(`
-          .rule { 
-            &-part1,
-            &-part2 {} 
+          .rule {
+            &${prefix}part1,
+            &${prefix}part2 {}
           }
         `)
       ).toMatchCSS(`
         .rule {}
-        .rule-part1,
-        .rule-part2 {}
-      `);
-    });
+        .rule${prefix}part1,
+        .rule${prefix}part2 {}
+      `)
+    })
 
-    it("should work with multiple parent selectors, and multiple &- selectors", async () => {
+    it(`should work with multiple parent selectors, and multiple &${prefix} selectors`, async () => {
       expect(
         await process(`
           .rule1,
-          .rule2 { 
-            &-part1,
-            &-part2 {}
+          .rule2 {
+            &${prefix}part1,
+            &${prefix}part2 {}
           }
         `)
       ).toMatchCSS(`
         .rule1,
         .rule2 {}
-        .rule1-part1,
-        .rule1-part2,
-        .rule2-part1,
-        .rule2-part2 {}
-      `);
-    });
-  });
+        .rule1${prefix}part1,
+        .rule1${prefix}part2,
+        .rule2${prefix}part1,
+        .rule2${prefix}part2 {}
+      `)
+    })
+  })
 
-  describe("comments", () => {
-    it("should promote comments immediately preceding promoted rules", async () => {
+  describe('comments', () => {
+    it('should promote comments immediately preceding promoted rules', async () => {
       expect(
         await process(`
           .rule {
@@ -153,8 +153,8 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         // preceding comment
         // second preceding comment
         .rule-part {}
-      `);
-    });
+      `)
+    })
 
     it("shouldn't promote comments preceding other rules", async () => {
       expect(
@@ -171,8 +171,8 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
           .something else {}
         }
         .rule-part {}
-      `);
-    });
+      `)
+    })
 
     it("shouldn't promote comments following promoted rules", async () => {
       expect(
@@ -187,12 +187,12 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
           // following comment
         }
         .rule-part {}
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("dollar vars", () => {
-    it("should leave root variables where they are", async () => {
+  describe('dollar vars', () => {
+    it('should leave root variables where they are', async () => {
       expect(
         await process(`
           $blue: #0000FF;
@@ -203,10 +203,10 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         $blue: #0000ff;
 
         .rule {}
-      `);
-    });
+      `)
+    })
 
-    it("should promote duplicate variables when possible", async () => {
+    it('should promote duplicate variables when possible', async () => {
       expect(
         await process(`
           .rule {
@@ -228,10 +228,10 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         .rule-part1-part2 {
           color: $blue;
         }
-      `);
-    });
+      `)
+    })
 
-    it("should throw when unable to promote duplicate variables", async () => {
+    it('should throw when unable to promote duplicate variables', async () => {
       expect(
         async () =>
           await process(`
@@ -246,15 +246,15 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
           `)
       ).rejects.toMatchInlineSnapshot(
         `[Error: Cannot promote decl $blue: #0000BB at 5:15]`
-      );
-    });
+      )
+    })
 
-    it("should promote a variable along with dependent rules", async () => {
+    it('should promote a variable along with dependent rules', async () => {
       expect(
         await process(`
           .rule {
             $blue: #0000FF;
-            
+
             &-part1 {
               color: $blue;
             }
@@ -266,10 +266,10 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         .rule-part1 {
           color: $blue;
         }
-      `);
-    });
+      `)
+    })
 
-    it("should places rules after first comments, imports and declarations", async () => {
+    it('should places rules after first comments, imports and declarations', async () => {
       expect(
         await process(`
           // comment
@@ -278,7 +278,7 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
           $var: 1;
           .rule {
             $blue: #0000FF;
-            
+
             &-part1 {
               color: $blue;
             }
@@ -294,19 +294,19 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         .rule-part1 {
           color: $blue;
         }
-      `);
-    });
-    it("should respect $var order dependencies", async () => {
+      `)
+    })
+    it('should respect $var order dependencies', async () => {
       expect(
         await process(`
           // comment
           @import "something";
-  
+
           $var: 1;
           .rule {
             $blue: #0000FF;
             $light-blue: lighten($blue, 0.2);
-            
+
             &-part1 {
               background-color: $light-blue;
               color: $blue;
@@ -325,20 +325,20 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
           background-color: $light-blue;
           color: $blue;
         }
-      `);
-    });
+      `)
+    })
 
-    it("should respect recursive $var dependencies", async () => {
+    it('should respect recursive $var dependencies', async () => {
       expect(
         await process(`
           // comment
           @import "something";
-  
+
           $var: 1;
           .rule {
             $blue: #0000FF;
             $light-blue: lighten($blue, 0.2);
-            
+
             &-part1 {
               color: $light-blue;
             }
@@ -355,15 +355,15 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         .rule-part1 {
           color: $light-blue;
         }
-      `);
-    });
+      `)
+    })
 
     it(`shouldn't promote dollar vars that aren't used by promoted rules`, async () => {
       expect(
         await process(`
           // comment
           @import "something";
-  
+
           $var: 1;
           .rule {
             $blue: #0000FF;
@@ -385,31 +385,31 @@ function testCommonBehavior(process: (css: string) => LazyResult) {
         .rule-part1 {
           color: $light-blue;
         }
-      `);
-    });
-  });
+      `)
+    })
+  })
 }
 
-describe("remove-dash-ampersand", () => {
-  describe("reorder: never", () => {
-    const process = createProcessor(removeDashAmpersand({ reorder: "never" }));
+describe('remove-dash-ampersand', () => {
+  describe('reorder: never', () => {
+    const process = createProcessor(removeDashAmpersand({ reorder: 'never' }))
 
-    testCommonBehavior(process);
+    testCommonBehavior(process)
 
-    it("should abandon changes that reorder selectors", async () => {
+    it('should abandon changes that reorder selectors', async () => {
       expect(
         await process(`
-          .rule1 { 
+          .rule1 {
             &-part1 {}
             &-part2 {}
             .something-else1 {}
-            .something-else2 {} 
+            .something-else2 {}
           }
-          .rule2 { 
+          .rule2 {
             &-part1 {}
             &-part2 {}
             .something-else1 {}
-            .something-else2 {} 
+            .something-else2 {}
           }
         `)
       ).toMatchCSS(`
@@ -425,19 +425,19 @@ describe("remove-dash-ampersand", () => {
           .something-else1 {}
           .something-else2 {}
         }
-      `);
-    });
+      `)
+    })
 
     it("should allow for partial migrations with the changes that don't change orders", async () => {
       expect(
         await process(`
-          .rule1 { 
+          .rule1 {
             &-part1 {}
             &-part2 {}
             .something-else1 {}
-            .something-else2 {} 
+            .something-else2 {}
           }
-          .rule2 { 
+          .rule2 {
             &-part1 {}
             &-part2 {}
           }
@@ -452,27 +452,27 @@ describe("remove-dash-ampersand", () => {
         .rule2 {}
         .rule2-part1 {}
         .rule2-part2 {}
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("reorder: safe-only", () => {
+  describe('reorder: safe-only', () => {
     const process = createProcessor(
-      removeDashAmpersand({ reorder: "safe-only" })
-    );
+      removeDashAmpersand({ reorder: 'safe-only' })
+    )
 
-    testCommonBehavior(process);
+    testCommonBehavior(process)
 
-    it("should apply changes if reordered selectors have different specificity", async () => {
+    it('should apply changes if reordered selectors have different specificity', async () => {
       expect(
         await process(`
-          .rule1 { 
-            &-part1 {} 
-            .something-else {} 
+          .rule1 {
+            &-part1 {}
+            .something-else {}
           }
-          .rule2 { 
-            &-part1 .more.specificity {} 
-            .something-else {} 
+          .rule2 {
+            &-part1 .more.specificity {}
+            .something-else {}
           }
         `)
       ).toMatchInlineSnapshot(`
@@ -484,15 +484,15 @@ describe("remove-dash-ampersand", () => {
           .something-else {}
         }
         .rule2-part1 .more.specificity {}
-      `);
-    });
+      `)
+    })
 
     it("shouldn't apply changes if reordered selectors have same specificity", async () => {
       expect(
         await process(`
-          .rule1 { 
-            &-part1 .same-specificity {} 
-            .something-else {} 
+          .rule1 {
+            &-part1 .same-specificity {}
+            .something-else {}
           }
         `)
       ).toMatchInlineSnapshot(`
@@ -500,23 +500,23 @@ describe("remove-dash-ampersand", () => {
           &-part1 .same-specificity {}
           .something-else {}
         }
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("reorder: allow-unsafe", () => {
+  describe('reorder: allow-unsafe', () => {
     const process = createProcessor(
-      removeDashAmpersand({ reorder: "allow-unsafe" })
-    );
+      removeDashAmpersand({ reorder: 'allow-unsafe' })
+    )
 
-    testCommonBehavior(process);
+    testCommonBehavior(process)
 
-    it("should apply changes regardless selector reordering", async () => {
+    it('should apply changes regardless selector reordering', async () => {
       expect(
         await process(`
-          .rule { 
-            &-part1 .same-specificity {} 
-            .something-else {} 
+          .rule {
+            &-part1 .same-specificity {}
+            .something-else {}
           }
         `)
       ).toMatchInlineSnapshot(`
@@ -524,23 +524,23 @@ describe("remove-dash-ampersand", () => {
           .something-else {}
         }
         .rule-part1 .same-specificity {}
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("promote-dollar-vars: no-global", () => {
+  describe('promote-dollar-vars: no-global', () => {
     const process = createProcessor(
-      removeDashAmpersand({ promoteDollarVars: "no-global" })
-    );
+      removeDashAmpersand({ promoteDollarVars: 'no-global' })
+    )
 
     it("won't promote rules with dollar vars that will be promoted to global", async () => {
       expect(
         await process(`
-          .rule { 
+          .rule {
             $var: blue;
             &-part1 {
               color: $var;
-            } 
+            }
           }
         `)
       ).toMatchInlineSnapshot(`
@@ -550,13 +550,11 @@ describe("remove-dash-ampersand", () => {
             color: $var;
           }
         }
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("multiple runs", () => {
-    it.todo(
-      "executing transforms one after the other maintains relative order"
-    );
-  });
-});
+  describe('multiple runs', () => {
+    it.todo('executing transforms one after the other maintains relative order')
+  })
+})

@@ -14,7 +14,8 @@
     "start": "npm run build -- --watch",
     "prepublishOnly": "npm run clean && npm run build",
     "test": "jest src",
-    "typecheck": "tsc --project . --noEmit"
+    "typecheck": "tsc --project . --noEmit",
+    "format": "prettier --write src"
   },
   "files": [
     "cli.js",

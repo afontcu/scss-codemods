@@ -1,28 +1,28 @@
-import { createProcessor } from "utils/postcss";
-import removeEmptyRules from "./remove-empty-rules";
+import { createProcessor } from 'utils/postcss'
+import removeEmptyRules from './remove-empty-rules'
 
-const process = createProcessor(removeEmptyRules());
+const process = createProcessor(removeEmptyRules())
 
-describe("remove-empty-rules", () => {
-  it("should remove an empty rule", async () => {
+describe('remove-empty-rules', () => {
+  it('should remove an empty rule', async () => {
     expect(
       await process(`
         .rule {}
       `)
-    ).toMatchInlineSnapshot(``);
-  });
+    ).toMatchInlineSnapshot(``)
+  })
 
-  it("should remove nested empty rules", async () => {
+  it('should remove nested empty rules', async () => {
     expect(
       await process(`
         .rule {
           .inner-rule {}
         }
       `)
-    ).toMatchInlineSnapshot(``);
-  });
+    ).toMatchInlineSnapshot(``)
+  })
 
-  it("should ignore rules with declarations", async () => {
+  it('should ignore rules with declarations', async () => {
     expect(
       await process(`
         .rule {
@@ -33,10 +33,10 @@ describe("remove-empty-rules", () => {
       .rule {
         color: #000000;
       }
-    `);
-  });
+    `)
+  })
 
-  it("should ignore variable declarations", async () => {
+  it('should ignore variable declarations', async () => {
     expect(
       await process(`
         .rule {
@@ -47,6 +47,6 @@ describe("remove-empty-rules", () => {
       .rule {
         $var: 1;
       }
-    `);
-  });
-});
+    `)
+  })
+})

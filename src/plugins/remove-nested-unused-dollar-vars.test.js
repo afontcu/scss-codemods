@@ -1,20 +1,20 @@
-import { createProcessor } from "utils/postcss";
-import removeEmptyRules from "./remove-nested-unused-dollar-vars";
+import { createProcessor } from 'utils/postcss'
+import removeEmptyRules from './remove-nested-unused-dollar-vars'
 
-const process = createProcessor(removeEmptyRules());
+const process = createProcessor(removeEmptyRules())
 
-describe("remove-nested-unused-dollar-vars", () => {
-  it("should remove an unused dollar decl", async () => {
+describe('remove-nested-unused-dollar-vars', () => {
+  it('should remove an unused dollar decl', async () => {
     expect(
       await process(`
         .rule {
           $unused: 1;
         }
       `)
-    ).toMatchInlineSnapshot(`.rule {}`);
-  });
+    ).toMatchInlineSnapshot(`.rule {}`)
+  })
 
-  it("should ignore used dollar decls", async () => {
+  it('should ignore used dollar decls', async () => {
     expect(
       await process(`
         .rule {
@@ -27,10 +27,10 @@ describe("remove-nested-unused-dollar-vars", () => {
         $used: #000000;
         color: $used;
       }
-    `);
-  });
+    `)
+  })
 
-  it("should ignore dollar decls used in @ rules", async () => {
+  it('should ignore dollar decls used in @ rules', async () => {
     expect(
       await process(`
         .rule {
@@ -43,10 +43,10 @@ describe("remove-nested-unused-dollar-vars", () => {
         $used: #000000;
         @include box-shadow($used);
       }
-    `);
-  });
+    `)
+  })
 
-  it("should ignore dollar decls used in @ rules", async () => {
+  it('should ignore dollar decls used in @ rules', async () => {
     expect(
       await process(`
         .rule {
@@ -61,10 +61,10 @@ describe("remove-nested-unused-dollar-vars", () => {
         $used: name;
         .#{$used} {}
       }
-    `);
-  });
+    `)
+  })
 
-  it("should remove unused dollar decl chains", async () => {
+  it('should remove unused dollar decl chains', async () => {
     expect(
       await process(`
         .rule {
@@ -72,10 +72,10 @@ describe("remove-nested-unused-dollar-vars", () => {
           $unused-2: 2 * $unused-1;
         }
       `)
-    ).toMatchInlineSnapshot(`.rule {}`);
-  });
+    ).toMatchInlineSnapshot(`.rule {}`)
+  })
 
-  it("should remove unused duplicate decls", async () => {
+  it('should remove unused duplicate decls', async () => {
     expect(
       await process(`
       .rule {
@@ -97,10 +97,10 @@ describe("remove-nested-unused-dollar-vars", () => {
           .part2 {}
         }
       }
-    `);
-  });
+    `)
+  })
 
-  it("should remove unused duplicate decls", async () => {
+  it('should remove unused duplicate decls', async () => {
     expect(
       await process(`
         .rule {
@@ -114,14 +114,14 @@ describe("remove-nested-unused-dollar-vars", () => {
       .rule {
         .part1 {}
       }
-    `);
-  });
+    `)
+  })
 
-  it("should ignore global rules even if unused", async () => {
+  it('should ignore global rules even if unused', async () => {
     expect(
       await process(`
         $unused-global: 1;
       `)
-    ).toMatchInlineSnapshot(`$unused-global: 1;`);
-  });
-});
+    ).toMatchInlineSnapshot(`$unused-global: 1;`)
+  })
+})

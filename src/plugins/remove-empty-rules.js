@@ -1,19 +1,19 @@
 export default (options = {}) => {
   // Work with options here
   return {
-    postcssPlugin: "remove-empty-rules",
+    postcssPlugin: 'remove-empty-rules',
     Once(root) {
-      let removed;
+      let removed
       // innefficient, but simple - keep repeating until there's been no changes
       do {
-        removed = false;
+        removed = false
         root.walkRules((rule) => {
           if (rule.nodes.length === 0) {
-            rule.remove();
-            removed = true;
+            rule.remove()
+            removed = true
           }
-        });
-      } while (removed === true);
+        })
+      } while (removed === true)
     },
-  };
-};
+  }
+}

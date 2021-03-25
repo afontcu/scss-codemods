@@ -1,2 +1,2 @@
-import "jest-postcss";
-import "utils/allow-inline-comments";
+import 'jest-postcss'
+import 'utils/allow-inline-comments'

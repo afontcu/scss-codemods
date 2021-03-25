@@ -1,26 +1,26 @@
-import { compareSelectorLists, getSelectorList } from "./selectors";
+import { compareSelectorLists, getSelectorList } from './selectors'
 
-import { createProcessor } from "utils/postcss";
+import { createProcessor } from 'utils/postcss'
 
 const process = createProcessor({
-  postcssPlugin: "identity",
+  postcssPlugin: 'identity',
   Once() {},
-});
+})
 const selectorsFromSCSS = async (scss: string) => {
-  return getSelectorList(await process(scss).root);
-};
+  return getSelectorList(await process(scss).root)
+}
 
-describe("selectors", () => {
-  describe("#getSelectorList", () => {
-    it("should produce a selector list from a single rule", async () => {
+describe('selectors', () => {
+  describe('#getSelectorList', () => {
+    it('should produce a selector list from a single rule', async () => {
       expect(
         await selectorsFromSCSS(`
           .rule {}
         `)
-      ).toEqual([".rule"]);
-    });
+      ).toEqual(['.rule'])
+    })
 
-    it("should produce a selector list from a media query", async () => {
+    it('should produce a selector list from a media query', async () => {
       expect(
         await selectorsFromSCSS(`
           .rule {
@@ -29,20 +29,20 @@ describe("selectors", () => {
             }
           }
         `)
-      ).toEqual([".rule", ".rule-part"]);
-    });
+      ).toEqual(['.rule', '.rule-part'])
+    })
 
-    it("should produce a selector list from nesting selector", async () => {
+    it('should produce a selector list from nesting selector', async () => {
       expect(
         await selectorsFromSCSS(`
           .rule {
             &-part {}
           }
         `)
-      ).toEqual([".rule", ".rule-part"]);
-    });
+      ).toEqual(['.rule', '.rule-part'])
+    })
 
-    it("should expand comma selectors", async () => {
+    it('should expand comma selectors', async () => {
       expect(
         await selectorsFromSCSS(`
           .rule1,
@@ -52,22 +52,22 @@ describe("selectors", () => {
           }
         `)
       ).toEqual([
-        ".rule1",
-        ".rule2",
-        ".rule1-part1",
-        ".rule1-part2",
-        ".rule2-part1",
-        ".rule2-part2",
-      ]);
-    });
-  });
+        '.rule1',
+        '.rule2',
+        '.rule1-part1',
+        '.rule1-part2',
+        '.rule2-part1',
+        '.rule2-part2',
+      ])
+    })
+  })
 
-  describe("#compareSelectorLists", () => {
-    it("should identify empty lists as NO_CHANGES", () => {
-      expect(compareSelectorLists([], [])).toEqual("NO_CHANGES");
-    });
+  describe('#compareSelectorLists', () => {
+    it('should identify empty lists as NO_CHANGES', () => {
+      expect(compareSelectorLists([], [])).toEqual('NO_CHANGES')
+    })
 
-    it("should identify no changes", async () => {
+    it('should identify no changes', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -82,10 +82,10 @@ describe("selectors", () => {
             .rule1-part2 {}
           `)
         )
-      ).toEqual("NO_CHANGES");
-    });
+      ).toEqual('NO_CHANGES')
+    })
 
-    it("should identify safe changes in simple list", async () => {
+    it('should identify safe changes in simple list', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -101,10 +101,10 @@ describe("selectors", () => {
             .rule1-part1 {}
           `)
         )
-      ).toEqual("SAFE_CHANGES");
-    });
+      ).toEqual('SAFE_CHANGES')
+    })
 
-    it("should identify safe changes with interleaved parts", async () => {
+    it('should identify safe changes with interleaved parts', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -122,10 +122,10 @@ describe("selectors", () => {
             .rule1-part2 {}
           `)
         )
-      ).toEqual("SAFE_CHANGES");
-    });
+      ).toEqual('SAFE_CHANGES')
+    })
 
-    it("should identify safe changes in complex list", async () => {
+    it('should identify safe changes in complex list', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -149,10 +149,10 @@ describe("selectors", () => {
             .rule2-part1 .more.specificity {}
           `)
         )
-      ).toEqual("SAFE_CHANGES");
-    });
+      ).toEqual('SAFE_CHANGES')
+    })
 
-    it("should identify unsafe changes in simple list", async () => {
+    it('should identify unsafe changes in simple list', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -168,10 +168,10 @@ describe("selectors", () => {
             .rule1-part1 .same-specificity {}
           `)
         )
-      ).toEqual("UNSAFE_CHANGES");
-    });
+      ).toEqual('UNSAFE_CHANGES')
+    })
 
-    it("should identify unsafe changes with interleaved parts", async () => {
+    it('should identify unsafe changes with interleaved parts', async () => {
       expect(
         compareSelectorLists(
           await selectorsFromSCSS(`
@@ -191,7 +191,7 @@ describe("selectors", () => {
             .rule1-part2 .same-specificity {}
           `)
         )
-      ).toEqual("UNSAFE_CHANGES");
-    });
-  });
-});
+      ).toEqual('UNSAFE_CHANGES')
+    })
+  })
+})
